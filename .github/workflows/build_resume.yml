@@ -1,50 +1,49 @@
+# This workflow builds the LaTeX resume and deploys it to GitHub Pages
 name: Build and Deploy LaTeX Resume
 
 on:
+  # Runs on pushes targeting the main branch
   push:
-    branches:
-      - main
+    branches: ["main"]
 
+# Sets permissions for the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: write  # To push the generated PDF back to the repo
-  pages: write     # To deploy to GitHub Pages
-  id-token: write  # Required for trusted deployment
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
-  build_latex:
+  # Build job
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Git repository
-        uses: actions/checkout@v3
-
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
       - name: Compile LaTeX document
-        uses: xu-cheng/latex-action@v2
+        uses: xu-cheng/latex-action@v3
         with:
           root_file: resume.tex
           
-      - name: Commit PDF to repo # This step keeps the PDF in your main branch
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add -f *.pdf
-          git commit -m "Generate resume PDF" || echo "No changes to commit"
-          git push || echo "No changes to push"
-
-      - name: Upload artifact for GitHub Pages
-        uses: actions/upload-pages-artifact@v3 # <-- This is the NEW version
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-         path: .
+          path: .
 
-    deploy_pages:
-    needs: build_latex
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write      # Grant permission to deploy to pages
-      id-token: write   # Grant permission for authentication
+  # Deployment job
+  deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4 # <-- Use the latest version v4
+        uses: actions/deploy-pages@v4
