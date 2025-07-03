@@ -31,10 +31,9 @@ jobs:
           git push || echo "No changes to push"
 
       - name: Upload artifact for GitHub Pages
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v3 # <-- This is the NEW version
         with:
-          # This tells Pages to upload everything from the current directory
-          path: .
+         path: .
 
   deploy_pages:
     needs: build_latex # This job runs only after the PDF is built
