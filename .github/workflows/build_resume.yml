@@ -35,13 +35,16 @@ jobs:
         with:
          path: .
 
-  deploy_pages:
-    needs: build_latex # This job runs only after the PDF is built
+    deploy_pages:
+    needs: build_latex
     runs-on: ubuntu-latest
+    permissions:
+      pages: write      # Grant permission to deploy to pages
+      id-token: write   # Grant permission for authentication
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4 # <-- Use the latest version v4
