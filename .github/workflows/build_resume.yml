@@ -1,13 +1,14 @@
-name: Build LaTeX Resume
+name: Build and Deploy LaTeX Resume
 
 on:
   push:
     branches:
       - main
 
-# ADD THIS PART to give the action permission to write the PDF back
 permissions:
-  contents: write
+  contents: write  # To push the generated PDF back to the repo
+  pages: write     # To deploy to GitHub Pages
+  id-token: write  # Required for trusted deployment
 
 jobs:
   build_latex:
@@ -20,11 +21,28 @@ jobs:
         uses: xu-cheng/latex-action@v2
         with:
           root_file: resume.tex
-
-      - name: Commit PDF
+          
+      - name: Commit PDF to repo # This step keeps the PDF in your main branch
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add -f *.pdf
           git commit -m "Generate resume PDF" || echo "No changes to commit"
           git push || echo "No changes to push"
+
+      - name: Upload artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v1
+        with:
+          # This tells Pages to upload everything from the current directory
+          path: .
+
+  deploy_pages:
+    needs: build_latex # This job runs only after the PDF is built
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
