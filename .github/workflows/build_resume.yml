@@ -9,6 +9,10 @@ on:
     # This saves you from running it unnecessarily.
     paths:
       - 'resume.tex'
+permissions:
+  contents: read
+  pages: write
+  id-token: write      
 
 jobs:
   build-latex:
