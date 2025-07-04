@@ -1,35 +1,31 @@
 # Name of the GitHub Action
 name: Compile LaTeX Resume
 
-# This action runs on pushes to the main branch...
 on:
   push:
     branches: [ "main" ]
-    # ...but ONLY if the resume.tex file was changed.
-    # This saves you from running it unnecessarily.
     paths:
       - 'resume.tex'
+
+# Permissions needed to commit the new PDF back to the repository
 permissions:
-  contents: read
-  pages: write
-  id-token: write      
+  contents: write
 
 jobs:
   build-latex:
     runs-on: ubuntu-latest
     steps:
-      # 1. Checks out your repository so the workflow can access your files.
+      # 1. Checks out your repository
       - name: Set up Git repository
         uses: actions/checkout@v4
 
-      # 2. Compiles the resume.tex file into resume.pdf.
+      # 2. Compiles the resume.tex file
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v3
         with:
           root_file: resume.tex
 
-      # 3. Commits the newly generated PDF file back to your repository.
-      # This is the key step that was missing.
+      # 3. Commits the new PDF
       - name: Commit resulting PDF
         run: |
           git config --local user.email "action@github.com"
