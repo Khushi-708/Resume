@@ -1,0 +1,27 @@
+name: Sync Overleaf Resume
+on:
+  schedule:
+    # Runs every 12 hours
+    - cron: '0 */12 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Fetch PDF from Overleaf (requires Overleaf project URL)
+      - name: Download PDF from Overleaf
+        run: |
+          curl -L "https://overleaf.com/project/YOUR_PROJECT_ID/download/pdf" \
+          --output ./resume.pdf
+
+      # Push changes
+      - name: Commit and Push
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add resume.pdf
+          git commit -m "Update resume.pdf"
+          git push
